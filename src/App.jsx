@@ -372,6 +372,13 @@ const App = () => {
       timestamp: new Date() // Adding timestamp for Firebase ordering
     };
 
+    // Remove undefined values — Firestore rejects them
+    Object.keys(updatedResult).forEach(key => {
+      if (updatedResult[key] === undefined) {
+        delete updatedResult[key];
+      }
+    });
+
     try {
       // Add the test result
       await addDoc(collection(db, 'results'), updatedResult);

@@ -3978,8 +3978,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, AlertCircle, CheckCircle, AlertTriangle, Video, X, Minimize2, Maximize2 } from 'lucide-react';
-import * as faceapi from 'face-api.js';
-import { CameraCapture } from '../Camera/CameraCapture';
+// import * as faceapi from 'face-api.js';
+// import { CameraCapture } from '../Camera/CameraCapture';
 import rtcService from '../../services/RTCStreamingService';
 import './TestInterface.css';
 
@@ -4018,9 +4018,9 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
         personality: 0
     });
     const [tabViolationCount, setTabViolationCount] = useState(0);
-    const [cameraViolationCount, setCameraViolationCount] = useState(0);
-    const [behaviorViolationCount, setBehaviorViolationCount] = useState(0);
-    const [faceViolationCount, setFaceViolationCount] = useState(0);
+    // const [cameraViolationCount, setCameraViolationCount] = useState(0);
+    // const [behaviorViolationCount, setBehaviorViolationCount] = useState(0);
+    // const [faceViolationCount, setFaceViolationCount] = useState(0);
     const [showWarning, setShowWarning] = useState(false);
     const [warningReason, setWarningReason] = useState('tab');
     const [isTerminated, setIsTerminated] = useState(false);
@@ -4045,13 +4045,13 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
     const [isTestCompleted, setIsTestCompleted] = useState(!!testAlreadyCompleted);
     
     const warningTimeoutRef = useRef(null);
-    const cameraViolationCooldownRef = useRef(0);
-    const behaviorViolationCooldownRef = useRef(0);
-    const faceViolationCooldownRef = useRef(0);
+    // const cameraViolationCooldownRef = useRef(0);
+    // const behaviorViolationCooldownRef = useRef(0);
+    // const faceViolationCooldownRef = useRef(0);
     const cameraStreamRef = useRef(null);
     const cameraPreviewRef = useRef(null);
-    const behaviorVideoRef = useRef(null);
-    const faceApiLoadedRef = useRef(false);
+    // const behaviorVideoRef = useRef(null);
+    // const faceApiLoadedRef = useRef(false);
     const terminationCalledRef = useRef(false);
     const submissionCalledRef = useRef(false);
     const [shuffledQuestions, setShuffledQuestions] = useState([]);
@@ -4239,103 +4239,11 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
 
     const [isPermissionPhase, setIsPermissionPhase] = useState(false);
 
-    const handleCameraViolation = (message = 'Camera malpractice detected') => {
-        const now = Date.now();
-        if (now - cameraViolationCooldownRef.current < 8000) {
-            return;
-        }
-        cameraViolationCooldownRef.current = now;
-
-        setWarningReason('camera');
-        setShowWarning(true);
-        playAlertSound();
-
-        if (warningTimeoutRef.current) {
-            clearTimeout(warningTimeoutRef.current);
-        }
-
-        warningTimeoutRef.current = setTimeout(() => {
-            setShowWarning(false);
-            warningTimeoutRef.current = null;
-        }, 10000);
-
-        setCameraViolationCount(prev => {
-            const next = prev + 1;
-            if (next >= 3) {
-                handleTerminate('camera');
-            }
-            return next;
-        });
-
-        console.warn(`Camera violation: ${message}`);
-    };
-
-    const handleCameraClosed = () => {
-        console.warn('Camera closed/disconnected - immediate termination');
-        handleTerminate('camera');
-    };
-
-    const handleBehaviorViolation = (message = 'Suspicious behavior detected') => {
-        const now = Date.now();
-        if (now - behaviorViolationCooldownRef.current < 10000) {
-            return;
-        }
-        behaviorViolationCooldownRef.current = now;
-
-        setWarningReason('behavior');
-        setShowWarning(true);
-        playAlertSound();
-
-        if (warningTimeoutRef.current) {
-            clearTimeout(warningTimeoutRef.current);
-        }
-
-        warningTimeoutRef.current = setTimeout(() => {
-            setShowWarning(false);
-            warningTimeoutRef.current = null;
-        }, 10000);
-
-        setBehaviorViolationCount(prev => {
-            const next = prev + 1;
-            if (next >= 3) {
-                handleTerminate('behavior');
-            }
-            return next;
-        });
-
-        console.warn(`Behavior violation: ${message}`);
-    };
-
-    const handleFaceViolation = (message = 'Face not properly visible') => {
-        const now = Date.now();
-        if (now - faceViolationCooldownRef.current < 8000) {
-            return;
-        }
-        faceViolationCooldownRef.current = now;
-
-        setWarningReason('face');
-        setShowWarning(true);
-        playAlertSound();
-
-        if (warningTimeoutRef.current) {
-            clearTimeout(warningTimeoutRef.current);
-        }
-
-        warningTimeoutRef.current = setTimeout(() => {
-            setShowWarning(false);
-            warningTimeoutRef.current = null;
-        }, 10000);
-
-        setFaceViolationCount(prev => {
-            const next = prev + 1;
-            if (next >= 3) {
-                handleTerminate('face');
-            }
-            return next;
-        });
-
-        console.warn(`Face violation: ${message}`);
-    };
+    // --- Behavioral violation handlers commented out ---
+    // const handleCameraViolation = (message = 'Camera malpractice detected') => { ... };
+    // const handleCameraClosed = () => { ... };
+    // const handleBehaviorViolation = (message = 'Suspicious behavior detected') => { ... };
+    // const handleFaceViolation = (message = 'Face not properly visible') => { ... };
     
     useEffect(() => {
         if (stage === TEST_STAGES.TEST) {
@@ -4347,206 +4255,29 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
         }
     }, [stage]);
 
-    // Load face-api.js models once
-    useEffect(() => {
-        const loadModels = async () => {
-            if (faceApiLoadedRef.current) return;
-            try {
-                const MODEL_URL = '/models';
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
-                ]);
-                faceApiLoadedRef.current = true;
-                console.log('face-api.js models loaded successfully');
-            } catch (error) {
-                console.error('Failed to load face-api.js models:', error);
-            }
-        };
-        loadModels();
-    }, []);
+    // --- face-api.js model loading commented out (behavioral violations disabled) ---
+    // useEffect(() => {
+    //     const loadModels = async () => {
+    //         if (faceApiLoadedRef.current) return;
+    //         try {
+    //             const MODEL_URL = '/models';
+    //             await Promise.all([
+    //                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+    //                 faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
+    //             ]);
+    //             faceApiLoadedRef.current = true;
+    //         } catch (error) {
+    //             console.error('Failed to load face-api.js models:', error);
+    //         }
+    //     };
+    //     loadModels();
+    // }, []);
 
-    // Camera malpractice monitoring (camera disabled/disconnected during test)
-    useEffect(() => {
-        if (stage !== TEST_STAGES.TEST || isPermissionPhase) {
-            return;
-        }
+    // --- Camera malpractice monitoring commented out (behavioral violations disabled) ---
 
-        let cameraWasActive = false;
+    // --- Behavior video stream attachment commented out (behavioral violations disabled) ---
 
-        const validateCamera = () => {
-            const stream = activeStream || cameraStreamRef.current;
-            const videoTrack = stream?.getVideoTracks?.()[0];
-
-            // Camera completely gone or track ended
-            if (!stream || !videoTrack || videoTrack.readyState === 'ended') {
-                if (cameraWasActive) {
-                    console.warn('Camera stream lost - immediate termination');
-                    handleCameraClosed();
-                } else {
-                    handleCameraViolation('Camera is not active. Please enable your camera.');
-                }
-                return;
-            }
-
-            cameraWasActive = true;
-
-            if (!videoTrack.enabled) {
-                handleCameraViolation('Camera is disabled. Please enable your camera and keep your face centered.');
-            }
-        };
-
-        const stream = activeStream || cameraStreamRef.current;
-        const videoTrack = stream?.getVideoTracks?.()[0];
-
-        if (videoTrack) {
-            cameraWasActive = true;
-        }
-
-        const onTrackEnded = () => {
-            console.warn('Camera track ended - immediate termination');
-            handleCameraClosed();
-        };
-        const onTrackMute = () => handleCameraViolation('Camera is muted. Please enable your camera.');
-
-        if (videoTrack) {
-            videoTrack.addEventListener('ended', onTrackEnded);
-            videoTrack.addEventListener('mute', onTrackMute);
-        }
-
-        const intervalId = setInterval(validateCamera, 3000);
-        validateCamera();
-
-        return () => {
-            clearInterval(intervalId);
-            if (videoTrack) {
-                videoTrack.removeEventListener('ended', onTrackEnded);
-                videoTrack.removeEventListener('mute', onTrackMute);
-            }
-        };
-    }, [stage, isPermissionPhase, activeStream]);
-
-    // Attach active stream to hidden behavior-analysis video
-    useEffect(() => {
-        const stream = activeStream || cameraStreamRef.current;
-        const behaviorVideo = behaviorVideoRef.current;
-        if (!behaviorVideo || !stream) return;
-
-        if (behaviorVideo.srcObject !== stream) {
-            behaviorVideo.srcObject = stream;
-            behaviorVideo.play().catch(() => {});
-        }
-    }, [activeStream, stage]);
-
-    // Face detection monitoring using face-api.js
-    useEffect(() => {
-        if (stage !== TEST_STAGES.TEST || isPermissionPhase) {
-            return;
-        }
-
-        let isRunning = false;
-        let noFaceCount = 0;
-
-        const analyzeFace = async () => {
-            if (isRunning || !faceApiLoadedRef.current) return;
-            isRunning = true;
-
-            try {
-                const behaviorVideo = behaviorVideoRef.current;
-                if (!behaviorVideo || behaviorVideo.readyState < 2 || !behaviorVideo.videoWidth) {
-                    return;
-                }
-
-                const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 });
-                const detections = await faceapi.detectAllFaces(behaviorVideo, options).withFaceLandmarks(true);
-
-                if (!detections || detections.length === 0) {
-                    noFaceCount++;
-                    if (noFaceCount >= 2) {
-                        handleBehaviorViolation('No face detected in camera. Please face the camera.');
-                        noFaceCount = 0;
-                    }
-                    return;
-                }
-
-                noFaceCount = 0;
-
-                if (detections.length > 1) {
-                    handleBehaviorViolation('Multiple faces detected in camera frame');
-                    return;
-                }
-
-                const detection = detections[0];
-                const box = detection.detection.box;
-                const vw = behaviorVideo.videoWidth;
-                const vh = behaviorVideo.videoHeight;
-
-                // Check face too small (too far from camera)
-                const faceRatio = (box.width * box.height) / (vw * vh);
-                if (faceRatio < 0.02) {
-                    handleBehaviorViolation('Face appears too far from camera');
-                    return;
-                }
-
-                // Check if face is cut off at edges
-                const edgeMargin = 0.04;
-                const isCutOff = (
-                    box.x < vw * edgeMargin ||
-                    box.y < vh * edgeMargin ||
-                    (box.x + box.width) > vw * (1 - edgeMargin) ||
-                    (box.y + box.height) > vh * (1 - edgeMargin)
-                );
-                if (isCutOff) {
-                    handleFaceViolation('Face is not completely visible. Please place your face in the center of the camera.');
-                    return;
-                }
-
-                // Check if face is not centered horizontally
-                const faceCenterX = box.x + box.width / 2;
-                if (faceCenterX < vw * 0.2 || faceCenterX > vw * 0.8) {
-                    handleFaceViolation('Please place your face in the center of the camera.');
-                    return;
-                }
-
-                // Use face landmarks to detect looking down
-                const landmarks = detection.landmarks;
-                const nose = landmarks.getNose();
-                const jaw = landmarks.getJawOutline();
-
-                if (nose.length > 0 && jaw.length > 0) {
-                    // Nose tip Y position relative to frame
-                    const noseTipY = nose[nose.length - 1].y;
-                    // Jaw bottom Y position
-                    const jawBottomY = jaw[Math.floor(jaw.length / 2)].y;
-                    
-                    // If nose tip is in the lower 70% and jaw nearly at bottom — looking down
-                    if (noseTipY > vh * 0.65) {
-                        handleFaceViolation('Please keep your face up and look at the screen.');
-                        return;
-                    }
-
-                    // Check face tilt: if jaw bottom is very close to frame edge
-                    if (jawBottomY > vh * 0.9) {
-                        handleFaceViolation('Your face is tilted too much. Please face the camera straight.');
-                        return;
-                    }
-                }
-            } catch (error) {
-                console.warn('Face analysis error:', error);
-            } finally {
-                isRunning = false;
-            }
-        };
-
-        const intervalId = setInterval(analyzeFace, 4000);
-        // Small delay to let video start playing
-        const initTimeout = setTimeout(() => analyzeFace(), 2000);
-
-        return () => {
-            clearInterval(intervalId);
-            clearTimeout(initTimeout);
-        };
-    }, [stage, isPermissionPhase, activeStream]);
+    // --- Face detection monitoring commented out (behavioral violations disabled) ---
     
     // Timer effect
     useEffect(() => {
@@ -4689,15 +4420,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
             case 'tab':
                 reasonText = 'Excessive tab violations detected';
                 break;
-            case 'camera':
-                reasonText = 'Excessive camera malpractice violations detected';
-                break;
-            case 'behavior':
-                reasonText = 'Excessive suspicious behavior violations detected';
-                break;
-            case 'face':
-                reasonText = 'Excessive face visibility violations detected';
-                break;
             default:
                 reasonText = 'Test integrity violation detected';
         }
@@ -4721,9 +4443,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
             },
             submittedBy: 'terminated',
             violations: tabViolationCount,
-            cameraViolations: cameraViolationCount,
-            behaviorViolations: behaviorViolationCount,
-            faceViolations: faceViolationCount,
             terminationReason: reasonText,
             completed: true // Add completed flag
         };
@@ -4826,13 +4545,10 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
                     score: scorableQuestions.length > 0 ? (score / scorableQuestions.length) * 100 : 0,
           timeSpent: 3600 - timeRemaining,
           answers,
-          codingAnswers: Object.keys(codingAnswers).length > 0 ? codingAnswers : undefined,
+          codingAnswers: Object.keys(codingAnswers).length > 0 ? codingAnswers : null,
           sections: sectionScores,
           submittedBy: isTimeUp ? 'timeout' : 'user',
           violations: tabViolationCount,
-                    cameraViolations: cameraViolationCount,
-                    behaviorViolations: behaviorViolationCount,
-                    faceViolations: faceViolationCount,
           completed: true // Add completed flag
         };
       
@@ -5212,58 +4928,22 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
                         </button>
                         <div className="caught-header">
                             <AlertTriangle className="caught-icon" size={32} />
-                            <h3>
-                                {warningReason === 'camera'
-                                    ? 'Camera Violation Detected!'
-                                    : warningReason === 'behavior'
-                                        ? 'Behavior Violation Detected!'
-                                        : warningReason === 'face'
-                                            ? 'Face Visibility Violation Detected!'
-                                            : 'Tab Violation Detected!'}
-                            </h3>
+                            <h3>Tab Violation Detected!</h3>
                         </div>
                         <div className="caught-content">
                             <p className="caught-message">
-                                {warningReason === 'camera'
-                                    ? 'Your camera is disabled! Please enable your camera immediately or your test will be terminated.'
-                                    : warningReason === 'behavior'
-                                        ? 'Suspicious behavior detected. Please face the camera alone and remain properly visible.'
-                                        : warningReason === 'face'
-                                            ? 'Your face is not fully visible. Please place your face in the center of the camera and look at the screen.'
-                                            : 'Please stay focused on the test window to maintain integrity.'}
+                                Please stay focused on the test window to maintain integrity.
                             </p>
                             <div className="violation-info">
-                                <span className="violation-label">
-                                    {warningReason === 'camera'
-                                        ? 'Camera Violations:'
-                                        : warningReason === 'behavior'
-                                            ? 'Behavior Violations:'
-                                            : warningReason === 'face'
-                                                ? 'Face Violations:'
-                                                : 'Tab Violations:'}
-                                </span>
-                                <span className="violation-number">
-                                    {warningReason === 'camera'
-                                        ? cameraViolationCount
-                                        : warningReason === 'behavior'
-                                            ? behaviorViolationCount
-                                            : warningReason === 'face'
-                                                ? faceViolationCount
-                                                : tabViolationCount}
-                                </span>
+                                <span className="violation-label">Tab Violations:</span>
+                                <span className="violation-number">{tabViolationCount}</span>
                             </div>
                         </div>
                         <div className="caught-progress">
                             <div
                                 className="progress-fill"
                                 style={{ 
-                                    width: `${Math.min((warningReason === 'camera'
-                                        ? cameraViolationCount
-                                        : warningReason === 'behavior'
-                                            ? behaviorViolationCount
-                                            : warningReason === 'face'
-                                                ? faceViolationCount
-                                                : tabViolationCount) * 33, 100)}%` 
+                                    width: `${Math.min(tabViolationCount * 33, 100)}%` 
                                 }}
                             />
                         </div>
@@ -5501,12 +5181,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
                 <div className="violation-item">
                     <p>Tab Violations: <span className="violation-count">{tabViolationCount}</span></p>
                 </div>
-                <div className="violation-item">
-                    <p>Camera Violations: <span className="violation-count">{cameraViolationCount}</span></p>
-                </div>
-                <div className="violation-item">
-                    <p>Behavior Violations: <span className="violation-count">{behaviorViolationCount}</span></p>
-                </div>
             </div>
             <button
                 className="submit-button"
@@ -5524,8 +5198,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
             <h2>Confirm Submission</h2>
             <p>Are you sure you want to submit your test?</p>
             <p>Tab violations recorded: {tabViolationCount}</p>
-            <p>Camera violations recorded: {cameraViolationCount}</p>
-            <p>Behavior violations recorded: {behaviorViolationCount}</p>
             <p>This action cannot be undone.</p>
             <div className="confirmation-buttons">
                 <button
@@ -5550,8 +5222,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
             <h2>Test Completed</h2>
             <p>Your responses have been recorded successfully.</p>
             <p>Tab violations recorded: {tabViolationCount}</p>
-            <p>Camera violations recorded: {cameraViolationCount}</p>
-            <p>Behavior violations recorded: {behaviorViolationCount}</p>
             <p className="completion-note">This test has been completed and cannot be taken again.</p>
             <p>You may now close this window.</p>
         </div>
@@ -5564,8 +5234,6 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
             <p className="termination-reason">{terminationReason}</p>
             <div className="violation-summary">
                 <p>Tab violations: <span className="violation-count">{tabViolationCount}</span></p>
-                <p>Camera violations: <span className="violation-count">{cameraViolationCount}</span></p>
-                <p>Behavior violations: <span className="violation-count">{behaviorViolationCount}</span></p>
             </div>
             <p className="termination-message">
                 Your test has been terminated due to integrity violations. 
@@ -5674,13 +5342,7 @@ export const TestInterface = ({ user, onComplete, questions = [], scheduledStart
 
     return (
         <div className="test-wrapper">
-            <video
-                ref={behaviorVideoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
-            />
+            {/* Behavior video element commented out (behavioral violations disabled) */}
             {/* Scheduled start notification overlay */}
             {showStartNotification && (
                 <div style={{
