@@ -146,6 +146,7 @@ export const Login = ({ onLogin, error, candidates = [] }) => {
   return (
     <div className="login-wrapper">
       <div className="login-container">
+        <img src="/logo/spherenex_logo.png" alt="Spherenex Logo" className="login-logo" />
         <h1 className="login-title">Internaship Assessment Portal</h1>
         <p className="login-subtitle">Please login to continue</p>
 

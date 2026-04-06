@@ -63,6 +63,17 @@
   }
 }
 
+/* Login Logo */
+.login-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px;
+  display: block;
+  object-fit: contain;
+  margin-bottom: 15px;
+  border-radius: 16px;
+}
+
 /* Login Title */
 .login-title {
   color: #2d3748;
